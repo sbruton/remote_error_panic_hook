@@ -96,7 +96,17 @@ cfg_if! {
 
         fn transmit(msg: &str) {
             let nav = gloo::utils::window().navigator();
-            nav.send_beacon_with_opt_str("http://localhost:42001", Some(msg));
+            match nav.send_beacon_with_opt_str("http://localhost:42001", Some(msg)) {
+                Ok(true) => {
+                    error("successfully reported exception".into());
+                }
+                Ok(false) => {
+                    error("failed to report exception".into());
+                }
+                Err(err) => {
+                    error(err.as_string().unwrap_or("failed to parse error".into()));
+                }
+            }
         }
 
         fn hook_impl(info: &panic::PanicInfo) {

@@ -94,6 +94,11 @@ cfg_if! {
             fn stack(error: &Error) -> String;
         }
 
+        fn transmit(msg: &str) {
+            let nav = gloo::utils::window().navigator();
+            nav.send_beacon_with_opt_str("http://localhost:42001", Some(msg));
+        }
+
         fn hook_impl(info: &panic::PanicInfo) {
             let mut msg = info.to_string();
 
@@ -118,8 +123,11 @@ cfg_if! {
             // https://github.com/rustwasm/console_error_panic_hook/issues/7
             msg.push_str("\n\n");
 
-            // Finally, log the panic with `console.error`!
-            error(msg);
+            // log the panic with `console.error`!
+            error(msg.clone());
+
+            // transmit the panic as a beacon
+            transmit(&msg);
         }
     } else {
         use std::io::{self, Write};
